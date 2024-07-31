@@ -1,0 +1,149 @@
+{% extends 'layouts/layouts.html' %} {% load static %} {% block content %}
+
+<link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css"
+/>
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Genre List</h1>
+                    <a href="{% url 'creategenre' %}">
+                        <button type="button" class="btn btn-primary">
+                            Add Genre
+                        </button>
+                    </a>
+                </div>
+                <!-- /.col -->
+                <div class="col-sm-6">
+
+                </div>
+                <!-- /.col -->
+            </div>
+
+            {% if messages %} {% for message in messages %}
+            <div
+                class="alert alert-success alert-dismissible fade show"
+                role="alert"
+            >
+                <strong>success!</strong>{{ message }}
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            {% endfor %} {% endif %}
+
+            <table id="example" class="table table-striped" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for genre in genres %}
+                    <tr>
+                        <td>{{genre.title }}</td>
+                        <td>
+                            <a href="{% url 'editgenre' genre.id %}">
+                                <button
+                                    type="button"
+                                    class="btn btn-block btn-primary"
+                                >
+                                    Edit
+                                </button>
+                            </a>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-block btn-danger deletegenre"
+                                    data-id="{{ genre.id }}"
+                                    data-title="{{ genre.title }}"
+                                >
+                                    Delete
+                                </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div
+            class="modal fade"
+            id="deleteModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            Delete User
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post">
+                         {% csrf_token %}
+                        <div class="modal-body"></div>
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-dismiss="modal"
+                            >
+                                Close
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Save changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.2/js/dataTables.bootstrap5.js"></script>
+    <script>
+        new DataTable("#example");
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".deletegenre").on("click", function () {
+               var base_url = window.location.origin;
+                var genre_id = $(this).attr("data-id");
+                var title = $(this).attr("data-title");
+                var cnt = "do you want" + " " + title + " to Delete?";
+                var action = base_url+"/deletegenre/" + genre_id+'/';
+                $("#deleteModal .modal-body").html(cnt);
+                $("#deleteModal form").attr("action", action);
+                $("#deleteModal ").modal("toggle");
+
+                $("#deleteModal ").modal("toggle");
+            });
+        });
+    </script>
+
+    {% endblock %}
+</div>
