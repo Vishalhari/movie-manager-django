@@ -1,7 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Genre,Movies
-from .forms import genreforms,Moviesforms
+from .models import Genre,Movies,Reviews
+from .forms import genreforms,Moviesforms,MovieStatusForm
 from django.contrib.auth.decorators import login_required
 
 
@@ -17,7 +17,7 @@ def Creategenre(requests):
         if form.is_valid():
             form.save()
             messages.success(requests, 'Genre Added Successfully!')
-            return redirect('genrelist')
+            return redirect('genreList')
     else:
      form = genreforms()
     return render(requests,'genre/creategenre.html',{'form':form})
@@ -31,7 +31,7 @@ def Editgenre(request,genre_id):
         if form.is_valid():
             form.save()
             messages.success(request, 'Genre Successfully Updated!')
-            return redirect('genrelist')
+            return redirect('genreList')
     else:
         form = genreforms(instance=genres)
     return render(request,'genre/editgenre.html',{'form':form})
@@ -42,7 +42,7 @@ def Deletegenre(request,genre_id):
     if request.method == "POST":
         genres.delete()
         messages.success(request, 'Genres Successfully Deleted!')
-        return redirect('genrelist')
+        return redirect('genreList')
 
 
 @login_required(login_url='/')
@@ -53,9 +53,13 @@ def listmovies(request):
 @login_required(login_url='/')
 def createmovies(request):
     if request.method == 'POST':
+        post_data = request.POST.copy()
+        post_data['users'] = request.user.id
+        post_data['approval_status'] = 1
         form = Moviesforms(request.POST,request.FILES)
         if form.is_valid():
             form.save()
+            return redirect('movieslist')
     else:
         form = Moviesforms()
     return render(request,'movie/createmovies.html',{'form':form})
@@ -73,6 +77,13 @@ def Editmovies(request,movie_id):
         form = Moviesforms(instance=movies)
     return render(request, 'movie/Editmovies.html', {'form': form,'movie':movies})
 
+
+def update_movie_status(request,pk,status):
+    movie = get_object_or_404(Movies,pk=pk)
+    movie.approval_status = status
+    movie.save()
+    return redirect('movieslist')
+
 @login_required(login_url='/')
 def Deletemovies(request,movie_id):
     movies = Movies.objects.get(id=movie_id)
@@ -80,6 +91,17 @@ def Deletemovies(request,movie_id):
         movies.delete()
         messages.success(request, 'Movies Successfully Deleted!')
         return redirect('movieslist')
+
+def Listreviews(request):
+    reviews = Reviews.objects.all()
+    return render(request, 'movie/reviewslist.html', {'reviews': reviews})
+
+def Updatecommentstatus(request,pk,status):
+    review = get_object_or_404(Reviews,pk=pk)
+    review.active=status
+    review.save()
+    return redirect('Reviewslist')
+
 
 
 

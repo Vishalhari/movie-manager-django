@@ -1,4 +1,6 @@
-{% extends 'layouts/layouts.html' %} {% load static %} {% block content %}
+{% extends 'layouts/layouts.html' %}
+{% load static %}
+{% block content %}
 
 <link
     rel="stylesheet"
@@ -76,6 +78,24 @@
                                 >
                                     Delete
                                 </button>
+                            {% if movie.approval_status == 1  %}
+                            <button
+                                    type="button"
+                                    class="btn btn-block btn-danger statusupdate"
+                                    data-id="{{ movie.id }}"
+                                    data-status="{{ movie.approval_status }}"
+                                    data-title="{{ movie.title }}"
+                                >Block/Reject</button>
+                            {% else %}
+                            <button
+                                    type="button"
+                                    class="btn btn-block btn-danger statusupdate"
+                                    data-id="{{ movie.id }}"
+                                    data-status="{{ movie.approval_status }}"
+                                    data-title="{{ movie.title }}"
+                                >Approve</button>
+                            {% endif %}
+
                         </td>
                     </tr>
                     {% endfor %}
@@ -125,6 +145,51 @@
                 </div>
             </div>
         </div>
+
+
+
+        <div
+            class="modal fade"
+            id="statusupdateModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel2">
+                            Approve/Reject Movies
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post">
+                         {% csrf_token %}
+                        <div class="modal-body"></div>
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-dismiss="modal"
+                            >
+                                Close
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                Save changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -145,7 +210,35 @@
                 $("#deleteModal form").attr("action", action);
                 $("#deleteModal ").modal("toggle");
             });
+
+
+            $(".statusupdate").on("click", function () {
+               var base_url = window.location.origin;
+                var movieid = $(this).attr("data-id");
+                var title = $(this).attr("data-title");
+                var status = $(this).attr("data-status");
+                if(status == 1){
+                    var status_txt = 'Reject';
+                    var status_to =0
+
+                } else {
+                    var status_txt = 'Approve';
+                     var status_to =1
+                }
+
+
+                var cnt = "do you want"+' '+status_txt+' '+title;
+                var action = base_url+"/movies/" + movieid+'/'+status_to+'/';
+
+                $("#statusupdateModal form").attr("action", action);
+                $("#statusupdateModal .modal-body").html(cnt);
+                $("#statusupdateModal ").modal("toggle");
+            });
         });
+
+
+
+
     </script>
 
     {% endblock %}

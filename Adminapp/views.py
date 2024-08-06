@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import login as authlogin,logout as authlogout
 from django.contrib.auth.decorators import login_required
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from .forms import UsersForm
 from Movieapp.models import Genre,Movies
 
@@ -45,7 +47,10 @@ def Editusers(request,user_id):
     if request.method == 'POST':
         form = UsersForm(request.POST,instance=users)
         if form.is_valid():
-            form.save()
+            form.save(commit=False)
+            if form.cleaned_data.get('password'):
+                users.set_password(form.cleaned_data.get('password'))
+            users.save()
             messages.success(request, 'User Successfully Updated!')
             return redirect('userslist')
     else:
@@ -91,5 +96,9 @@ def Createusers(request):
 def Adminlogout(request):
     authlogout(request)
     return redirect('adminlogin')
+
+
+
+
 
 

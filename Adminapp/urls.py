@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.urls import path
-
 from . import views
 
 
@@ -12,5 +11,9 @@ urlpatterns = [
      path("editusers/<int:user_id>/", views.Editusers,name="editusers"),
      path("deleteusers/<int:user_id>/", views.Deleteusers,name="deleteusers"),
      path("adminlogout/", views.Adminlogout, name="adminlogout"),
+
+
+
+
 ]
 

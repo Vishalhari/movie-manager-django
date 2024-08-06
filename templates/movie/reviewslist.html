@@ -1,0 +1,171 @@
+{% extends 'layouts/layouts.html' %} {% load static %} {% block content %}
+
+<link
+  rel="stylesheet"
+  href="https://cdn.datatables.net/2.1.2/css/dataTables.bootstrap5.css"
+/>
+<link rel="stylesheet" href="{% static 'dist/css/rating.css' %}" />
+
+<div class="content-wrapper">
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1 class="m-0">Movie Review List</h1>
+        </div>
+        <div class="col-sm-6"></div>
+      </div>
+
+      {% if messages %} {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Success!</strong> {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+    </div>
+  </div>
+
+  <table id="example" class="table table-striped" style="width: 100%">
+    <thead>
+      <tr>
+        <th>Movie Name</th>
+        <th>Comments</th>
+        <th>Rating</th>
+        <th>User</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for rev in reviews %}
+      <tr>
+        <td>{{ rev.MovieId.title }}</td>
+        <td>{{ rev.review }}</td>
+        <td>
+          <div
+            class="Stars"
+            style="--rating: {{ rev.rating }}.0;"
+            aria-label="Rating of this product is {{ rev.rating }} out of 5."
+          ></div>
+        </td>
+        <td>{{ rev.UserId.first_name }} {{ rev.UserId.last_name }}</td>
+        <td>
+          {% if rev.active == 1 %}
+          <button
+            type="button"
+            class="btn btn-block btn-danger statusupdate"
+            data-id="{{ rev.id }}"
+            data-status="{{ rev.active }}"
+            data-movie="{{ rev.MovieId.title }}"
+            data-rating="{{ rev.rating }}"
+            data-comment="{{ rev.review }}"
+          >
+            Block/Reject
+          </button>
+          {% else %}
+          <button
+            type="button"
+            class="btn btn-block btn-danger statusupdate"
+            data-id="{{ rev.id }}"
+            data-status="{{ rev.active }}"
+            data-movie="{{ rev.MovieId.title }}"
+            data-rating="{{ rev.rating }}"
+            data-comment="{{ rev.review }}"
+          >
+            Approve
+          </button>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div
+  class="modal fade"
+  id="commentapproveModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">
+          Approve/Reject Review
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.1.2/js/dataTables.bootstrap5.js"></script>
+<script>
+  new DataTable("#example");
+</script>
+<script>
+  $(document).ready(function () {
+    $(".statusupdate").on("click", function () {
+      var base_url = window.location.origin;
+      var reviewid = $(this).attr("data-id");
+      var movie = $(this).attr("data-movie");
+      var rating = $(this).attr("data-rating");
+      var comment = $(this).attr("data-comment");
+      var status = $(this).attr("data-status");
+
+      if (status == 1) {
+        var status_txt = "Reject";
+        var status_to = 0;
+      } else {
+        var status_txt = "Approve";
+        var status_to = 1;
+      }
+
+      var rating = "<div class='Stars' style='--rating: " + rating + ".0;' aria-label='Rating of this product is " + rating + " out of 5.'></div>";
+
+
+      var cnt =
+        "<div>" +
+            "<p>Do you want to " + status_txt + " " + movie + " ? </p>"+
+            "<p><b>review</b> "+comment+" "+
+                "<p>rating</p>"+
+                rating+
+
+        "</div>";
+        var action = base_url+"/reviews/" + reviewid+'/'+status_to+'/';
+
+        $("#commentapproveModal form").attr("action", action)
+        $("#commentapproveModal .modal-body").html(cnt);
+        $("#commentapproveModal ").modal("toggle");
+    });
+  });
+</script>
+
+{% endblock %}

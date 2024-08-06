@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("Adminapp.urls")),
     path("", include("Movieapp.urls")),
+    path("auth/", include("Auth.urls")),
 ]
 
 if settings.DEBUG:
